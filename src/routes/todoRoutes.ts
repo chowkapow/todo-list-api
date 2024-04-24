@@ -93,4 +93,22 @@ router.put("/:todoId", async (req: Request, res: Response) => {
   }
 });
 
+router.delete("/:todoId", async (req: Request, res: Response) => {
+  try {
+    const { todoId } = req.params;
+
+    const queryText = `DELETE FROM todos WHERE id = $1 RETURNING *`;
+
+    const { rows } = await pool.query(queryText, [todoId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Todo item not found" });
+    }
+    res.json(rows[0]);
+  } catch (error) {
+    console.error("Error executing SQL query to delete todo: " + error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;
